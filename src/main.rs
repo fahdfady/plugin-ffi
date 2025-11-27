@@ -1,4 +1,4 @@
-use std::fs;
+use std::{ffi::CStr, fs};
 
 use libloading::{Library, Symbol};
 
@@ -10,7 +10,7 @@ struct PluginInfo {
 
 struct Plugin {
     //lib: Library,
-    info: PluginInfo,
+    name: String,
     process: unsafe extern "C" fn(*mut f32, i32),
     cleanup: unsafe extern "C" fn(),
 }
@@ -22,12 +22,16 @@ impl Plugin {
             let get_info: Symbol<unsafe extern "C" fn() -> PluginInfo> =
                 lib.get(b"get_plugin_info")?;
             let info = get_info();
+            let name = CStr::from_ptr(info.name).to_str()?.to_string();
+            let init: Symbol<unsafe extern "C" fn()> = lib.get(b"plugin_init")?;
             let process: Symbol<unsafe extern "C" fn(*mut f32, i32)> = lib.get(b"process_audio")?;
             let cleanup: Symbol<unsafe extern "C" fn()> = lib.get(b"plugin_cleanup")?;
 
+            init();
+
             Ok(Self {
                 // lib,
-                info,
+                name,
                 process: *process,
                 cleanup: *cleanup,
             })
@@ -44,8 +48,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let path = entry?.path();
         let ext = path.extension().unwrap();
         if ext == "so" {
-            println!("found lib: {}", path.display());
+            println!("found path: {}", path.display());
             let plugin = Plugin::load(path.to_str().unwrap())?;
+            println!("plugin name: {}", plugin.name);
             plugin.process(&mut audio_buffer);
         }
     }
