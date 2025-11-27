@@ -1,4 +1,7 @@
 #include "./plugin_api.h"
+#include <stdio.h>
+
+void plugin_init() { printf("Init plugin gain"); }
 
 PluginInfo get_plugin_info() {
   PluginInfo info;
@@ -14,3 +17,5 @@ void process_audio(float *buffer, int length) {
     buffer[i] *= 1.5f;
   }
 }
+
+void plugin_cleanup() { printf("Cleaned Up"); }
