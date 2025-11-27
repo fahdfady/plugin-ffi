@@ -1,10 +1,9 @@
 #include "./plugin_api.h"
-#include <string.h>
 
 PluginInfo get_plugin_info() {
   PluginInfo info;
   info.name = "Simple Gain";
-  info.author = "Your Name";
+  info.author = "fahdashour";
   info.version = 1;
 
   return info;

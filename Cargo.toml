@@ -2,7 +2,8 @@
 name = "plugin-ffi"
 version = "0.1.0"
 edition = "2021"
-
+description = "a toy project testing FFI in rust and C"
+categories = ["ffi"]
 
 [dependencies]
 libloading = "0.9"
