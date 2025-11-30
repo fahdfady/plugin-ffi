@@ -9,7 +9,7 @@ struct PluginInfo {
 }
 
 struct Plugin {
-    //lib: Library,
+    lib: Library,
     name: String,
     process: unsafe extern "C" fn(*mut f32, i32),
     cleanup: unsafe extern "C" fn(),
@@ -24,16 +24,21 @@ impl Plugin {
             let info = get_info();
             let name = CStr::from_ptr(info.name).to_str()?.to_string();
             let init: Symbol<unsafe extern "C" fn()> = lib.get(b"plugin_init")?;
-            let process: Symbol<unsafe extern "C" fn(*mut f32, i32)> = lib.get(b"process_audio")?;
-            let cleanup: Symbol<unsafe extern "C" fn()> = lib.get(b"plugin_cleanup")?;
 
             init();
 
+            let process_sym: Symbol<unsafe extern "C" fn(*mut f32, i32)> =
+                lib.get(b"process_audio")?;
+            let cleanup_sym: Symbol<unsafe extern "C" fn()> = lib.get(b"plugin_cleanup")?;
+
+            let process = *process_sym;
+            let cleanup = *cleanup_sym;
+
             Ok(Self {
-                // lib,
+                lib,
                 name,
-                process: *process,
-                cleanup: *cleanup,
+                process,
+                cleanup,
             })
         }
     }
